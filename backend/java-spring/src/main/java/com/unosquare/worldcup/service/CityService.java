@@ -34,6 +34,8 @@ public class CityService {
     // ============================================================
 
     public List<City> getAllCities() {
-        return cityRepository.findAll();
+        // TODO: Implement this method to return all cities
+        // Hint: Use cityRepository.findAll()
+        return new ArrayList<>();
     }
 }

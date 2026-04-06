@@ -85,58 +85,23 @@ public class CostCalculator {
             List<FlightPrice> flightPrices,
             City originCity
     ) {
-        // 1. Sort matches by kickoff date
-        List<MatchWithCityDTO> sortedMatches = matches.stream()
-                .sorted(Comparator.comparing(MatchWithCityDTO::getKickoff))
-                .collect(Collectors.toList());
-
-        // 2. Find countries visited (from match cities)
-        List<String> countriesVisited = sortedMatches.stream()
-                .map(m -> m.getCity().getCountry())
-                .distinct()
-                .collect(Collectors.toList());
-
-        // 3. Find missing countries (compare against REQUIRED_COUNTRIES)
-        List<String> missingCountries = REQUIRED_COUNTRIES.stream()
-                .filter(c -> !countriesVisited.contains(c))
-                .collect(Collectors.toList());
-
-        // 4. Calculate costs using helper methods
-        double ticketsCost = calculateTicketsCost(sortedMatches);
-        double flightsCost = calculateFlightsCost(originCity, sortedMatches, flightPrices);
-        double accommodationCost = calculateAccommodationCost(sortedMatches);
-        double totalCost = ticketsCost + flightsCost + accommodationCost;
-
-        // 5. Build CostBreakdownDTO with the costs
-        CostBreakdownDTO costBreakdown = new CostBreakdownDTO(
-                flightsCost,
-                accommodationCost,
-                ticketsCost,
-                totalCost
-        );
-
-        // 6. Determine feasibility: no missing countries AND totalCost <= budget
-        boolean feasible = missingCountries.isEmpty() && totalCost <= budget;
-
-        // 7. Generate suggestions if not feasible
-        List<String> suggestions = new ArrayList<>();
-        if (!feasible) {
-            suggestions = generateSuggestions(missingCountries, totalCost, budget, sortedMatches);
-        }
-
-        // 8. Build route using BuildRouteUtil
-        OptimisedRouteDTO route = BuildRouteUtil.buildRoute(sortedMatches, "budget-optimised");
-
-        // 9. Return BudgetResultDTO with all the data
-        return new BudgetResultDTO(
-                feasible,
-                route,
-                costBreakdown,
-                countriesVisited,
-                missingCountries,
-                totalCost,
-                suggestions
-        );
+        // TODO: Implement this method
+        //
+        // Steps:
+        //   1. Sort matches by kickoff date
+        //   2. Find countries visited (from match cities)
+        //   3. Find missing countries (compare against REQUIRED_COUNTRIES)
+        //   4. Calculate costs using helper methods:
+        //      - ticketsCost = calculateTicketsCost(sortedMatches)
+        //      - flightsCost = calculateFlightsCost(originCity, sortedMatches, flightPrices)
+        //      - accommodationCost = calculateAccommodationCost(sortedMatches)
+        //   5. Build CostBreakdownDTO with the costs
+        //   6. Determine feasibility: no missing countries AND totalCost <= budget
+        //   7. Generate suggestions using generateSuggestions() helper
+        //   8. Build route using BuildRouteUtil.buildRoute(sortedMatches, "budget-optimised")
+        //   9. Return BudgetResultDTO with all the data
+        //
+        return null;
     }
 
     /**

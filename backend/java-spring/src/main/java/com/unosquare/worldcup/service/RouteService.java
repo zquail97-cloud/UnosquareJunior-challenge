@@ -63,20 +63,16 @@ public class RouteService {
     //
     // ============================================================
     public OptimisedRouteDTO optimise(List<String> matchIds, String originCityId) {
-        // 1. Fetch matches from the database
-        List<MatchWithCityDTO> matches = matchRepository.findByIdIn(matchIds)
-                .stream()
-                .map(MatchWithCityDTO::fromEntity)
-                .toList();
-
-        // 2. Fetch origin city if provided
-        City originCity = null;
-        if (originCityId != null) {
-            originCity = cityRepository.findById(originCityId).orElse(null);
-        }
-
-        // 3. Call strategy and return result
-        return nearestNeighbourStrategy.optimise(matches, originCity);
+        // TODO: Implement this method
+        //
+        // Steps:
+        //   1. Fetch matches from the database using matchRepository.findByIdIn(matchIds)
+        //   2. Convert Match entities to MatchWithCityDTO using MatchWithCityDTO.fromEntity()
+        //   3. Fetch origin city if provided using cityRepository.findById(originCityId)
+        //   4. Call nearestNeighbourStrategy.optimise(matches, originCity)
+        //   5. Return the result
+        //
+        return null;
     }
 
     /**

@@ -41,18 +41,15 @@ public class MatchService {
     //
     // ============================================================
     public List<MatchWithCityDTO> getMatches(String city, LocalDate date) {
-        List<Match> matches;
-
-        if (city != null) {
-            matches = matchRepository.findByCityId(city);
-        } else {
-            matches = matchRepository.findAllOrderByKickoff();
-        }
-
-        return matches.stream()
-                .filter(match -> date == null || match.getKickoff().toLocalDate().equals(date))
-                .map(MatchWithCityDTO::fromEntity)
-                .toList();
+        // TODO: Implement this method
+        //
+        // Steps:
+        //   1. If city is provided, use matchRepository.findByCityId(city)
+        //      Otherwise use matchRepository.findAllOrderByKickoff()
+        //   2. If date is provided, filter matches by kickoff date
+        //   3. Convert Match entities to MatchWithCityDTO using MatchWithCityDTO.fromEntity()
+        //
+        return new ArrayList<>();
     }
 
     /**

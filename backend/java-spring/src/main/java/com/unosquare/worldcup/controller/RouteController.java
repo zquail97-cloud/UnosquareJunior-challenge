@@ -36,7 +36,9 @@ public class RouteController {
     // ============================================================
     @PostMapping("/optimise")
     public OptimisedRouteDTO optimise(@RequestBody OptimiseRequestDTO request) {
-        return routeService.optimise(request.getMatchIds(), request.getOriginCityId());
+        // TODO: Implement this endpoint
+        // Hint: Call routeService.optimise() with the match IDs and origin city ID from the request
+        return null;
     }
 
     // ============================================================
@@ -57,7 +59,9 @@ public class RouteController {
     // ============================================================
     @PostMapping("/budget")
     public BudgetResultDTO calculateBudget(@RequestBody BudgetRequestDTO request) {
-        return routeService.calculateBudget(request.getMatchIds(), request.getBudget(), request.getOriginCityId());
+        // TODO: Implement this endpoint
+        // Hint: Call routeService.calculateBudget() with the request data
+        return null;
     }
 
     // ============================================================
@@ -77,6 +81,8 @@ public class RouteController {
     // ============================================================
     @PostMapping("/best-value")
     public BestValueResultDTO findBestValue(@RequestBody BestValueRequestDTO request) {
-        return routeService.findBestValue(request.getBudget(), request.getOriginCityId());
+        // TODO: Implement this endpoint (BONUS)
+        // Hint: Call routeService.findBestValue() with the request data
+        return null;
     }
 }

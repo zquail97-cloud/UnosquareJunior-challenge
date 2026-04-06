@@ -43,7 +43,9 @@ public class MatchController {
     public List<MatchWithCityDTO> getMatches(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) LocalDate date) {
-        return matchService.getMatches(city, date);
+        // TODO: Implement this endpoint
+        // Hint: Use matchService.getMatches(city, date)
+        return new ArrayList<>();
     }
 
     @GetMapping("/{id}")

@@ -51,53 +51,20 @@ public class BestValueFinder {
     public BestValueResultDTO findBestValue(List<MatchWithCityDTO> allMatches, Double budget, String originCityId,
             List<FlightPrice> flightPrices,
             City originCity) {
-        // Return error if no matches available
-        if (allMatches == null || allMatches.isEmpty()) {
-            return buildErrorResult("No matches available");
-        }
-
-        // Try to find combinations from largest to smallest (to maximize matches)
-        List<MatchWithCityDTO> bestWithinBudget = null;
-        double bestWithinBudgetCost = 0;
-
-        List<MatchWithCityDTO> closestOverBudget = null;
-        double closestOverBudgetCost = Double.MAX_VALUE;
-
-        // Start with the maximum possible matches and work down to minimum
-        for (int size = allMatches.size(); size >= MINIMUM_MATCHES; size--) {
-            List<List<MatchWithCityDTO>> combinations = generateValidCombinations(allMatches, size);
-
-            for (List<MatchWithCityDTO> combination : combinations) {
-                double cost = calculateTotalCost(combination, originCity, flightPrices);
-
-                if (cost <= budget) {
-                    // Found a valid combination within budget
-                    if (bestWithinBudget == null || combination.size() > bestWithinBudget.size() ||
-                            (combination.size() == bestWithinBudget.size() && cost < bestWithinBudgetCost)) {
-                        bestWithinBudget = combination;
-                        bestWithinBudgetCost = cost;
-                    }
-                } else {
-                    // Track closest over-budget option
-                    if (cost < closestOverBudgetCost) {
-                        closestOverBudget = combination;
-                        closestOverBudgetCost = cost;
-                    }
-                }
-            }
-
-            // If we found a valid option within budget, return it
-            if (bestWithinBudget != null) {
-                return buildResult(bestWithinBudget, bestWithinBudgetCost, true, budget, originCity, flightPrices);
-            }
-        }
-
-        // Return closest over-budget option if no within-budget option found
-        if (closestOverBudget != null) {
-            return buildResult(closestOverBudget, closestOverBudgetCost, false, budget, originCity, flightPrices);
-        }
-
-        return buildErrorResult("Could not find any valid combination of matches");
+        // TODO: Implement this method to find the best combination of matches within budget.
+        //
+        // Requirements:
+        //   - Return an error result if no matches are available (use buildErrorResult())
+        //   - Find the combination that fits the budget with the most matches
+        //   - If nothing fits the budget, return the closest option
+        //
+        // Available helper methods:
+        //   - generateValidCombinations(matches, targetSize) - generates combinations meeting country requirements
+        //   - calculateTotalCost(matches, originCity, flightPrices) - calculates total cost
+        //   - buildResult(combination, cost, withinBudget, budget, originCity, flightPrices) - builds success response
+        //   - buildErrorResult(message) - builds error response
+        //
+        return buildErrorResult("Not implemented");
     }
 
 

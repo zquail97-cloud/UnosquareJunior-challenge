@@ -73,52 +73,25 @@ public class NearestNeighbourStrategy implements RouteStrategy {
 
     @Override
     public OptimisedRouteDTO optimise(List<MatchWithCityDTO> matches, City originCity) {
-        // Handle empty/null matches
-        if (matches == null || matches.isEmpty()) {
-            return createEmptyRoute();
-        }
-
-        // Sort matches by kickoff date
-        List<MatchWithCityDTO> sortedMatches = matches.stream()
-                .sorted(Comparator.comparing(MatchWithCityDTO::getKickoff))
-                .collect(Collectors.toList());
-
-        // Group matches by date
-        Map<java.time.LocalDate, List<MatchWithCityDTO>> matchesByDate = sortedMatches.stream()
-                .collect(Collectors.groupingBy(m -> m.getKickoff().toLocalDate()));
-
-        // Process matches using nearest-neighbour algorithm
-        List<MatchWithCityDTO> orderedMatches = new ArrayList<>();
-        City currentCity = originCity != null ? originCity : sortedMatches.get(0).getCity();
-
-        // Get sorted dates
-        List<java.time.LocalDate> sortedDates = matchesByDate.keySet().stream()
-                .sorted()
-                .collect(Collectors.toList());
-
-        for (java.time.LocalDate date : sortedDates) {
-            List<MatchWithCityDTO> dayMatches = matchesByDate.get(date);
-
-            if (dayMatches.size() == 1) {
-                // Only one match that day - add it
-                orderedMatches.add(dayMatches.get(0));
-                currentCity = dayMatches.get(0).getCity();
-            } else {
-                // Multiple matches - pick nearest to current city
-                final City currCity = currentCity;
-                MatchWithCityDTO nearest = dayMatches.stream()
-                        .min(Comparator.comparingDouble(m -> HaversineUtil.calculateDistance(
-                                currCity.getLatitude(), currCity.getLongitude(),
-                                m.getCity().getLatitude(), m.getCity().getLongitude())))
-                        .orElse(dayMatches.get(0));
-                orderedMatches.add(nearest);
-                currentCity = nearest.getCity();
-            }
-        }
-
-        OptimisedRouteDTO route = buildRoute(orderedMatches, originCity);
-        validateRoute(route, orderedMatches);
-        return route;
+        // TODO: Implement the nearest-neighbour algorithm
+        //
+        // Steps:
+        //   1. Handle empty/null matches - use createEmptyRoute()
+        //   2. Sort matches by kickoff date
+        //   3. Group matches by date (use Collectors.groupingBy)
+        //   4. For each date (in sorted order):
+        //      - If only 1 match that day, add it to orderedMatches
+        //      - If multiple matches, pick the nearest to currentCity
+        //   5. Track currentCity as you process each match
+        //   6. Build and validate route using buildRoute() and validateRoute()
+        //
+        // Hints:
+        //   - Use HaversineUtil.calculateDistance(lat1, lon1, lat2, lon2) for distance
+        //   - Use match.getKickoff().toLocalDate() to get the date
+        //   - Use Comparator for sorting
+        //   - Use Collectors to group matches by date
+        //
+        return createEmptyRoute();
     }
 
     // ============================================================
@@ -143,36 +116,22 @@ public class NearestNeighbourStrategy implements RouteStrategy {
      * Validates route constraints (minimum matches, country coverage).
      */
     private void validateRoute(OptimisedRouteDTO route, List<MatchWithCityDTO> matches) {
-        List<String> warnings = new ArrayList<>();
-        boolean feasible = true;
-
-        // Get countries visited
-        List<String> countriesVisited = matches.stream()
-                .map(m -> m.getCity().getCountry())
-                .distinct()
-                .collect(Collectors.toList());
-
-        // Find missing countries
-        List<String> missingCountries = REQUIRED_COUNTRIES.stream()
-                .filter(c -> !countriesVisited.contains(c))
-                .collect(Collectors.toList());
-
-        // Check minimum matches constraint
-        if (matches.size() < MINIMUM_MATCHES) {
-            feasible = false;
-            warnings.add("Must select at least " + MINIMUM_MATCHES + " matches");
-        }
-
-        // Check country coverage constraint
-        if (!missingCountries.isEmpty()) {
-            feasible = false;
-            warnings.add("Missing matches in: " + String.join(", ", missingCountries));
-        }
-
-        route.setFeasible(feasible);
-        route.setWarnings(warnings);
-        route.setCountriesVisited(countriesVisited);
-        route.setMissingCountries(missingCountries);
+        // TODO: Implement route validation
+        //
+        // Check the following constraints:
+        //   1. Minimum matches - must have at least MINIMUM_MATCHES (5)
+        //   2. Country coverage - must visit all REQUIRED_COUNTRIES (USA, Mexico, Canada)
+        //
+        // Set on the route:
+        //   - route.setFeasible(true/false)
+        //   - route.setWarnings(list of warning messages)
+        //   - route.setCountriesVisited(list of countries)
+        //   - route.setMissingCountries(list of missing countries)
+        //
+        route.setFeasible(false);
+        route.setWarnings(new ArrayList<>());
+        route.setCountriesVisited(new ArrayList<>());
+        route.setMissingCountries(new ArrayList<>());
     }
 
     
