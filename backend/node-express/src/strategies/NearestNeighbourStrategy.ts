@@ -60,13 +60,81 @@ export class NearestNeighbourStrategy implements RouteStrategy {
   // ============================================================
 
   optimise(matches: MatchWithCity[], originCity?: City): OptimisedRoute {
-    // TODO: Your code here
-    const orderedMatches: MatchWithCity[] = [];
+    // 1. Handle empty/null matches 
+     if (!matches || matches.length === 0){
+      return this.createEmptyRoute();
+     }
 
-    // TODO: Your code here
+     // 2. Sort all matches chronologically by kickoff date
+     // I decided to use the spread operator here to create a shallow copy.
+     // This allows for the data to be sorted without mutating the original array passed into the method.
+     const sortedMatches = [...matches].sort((a,b) => 
+      new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime()
+    );
+    
+    // 3. Group matches by date
+    const groupedByDate: Record<string, MatchWithCity[]> = {};
+     // Keep track of the chronological ordere of dates
+    const uniqueDates: string[] = [];
 
+    for (const match of sortedMatches){
+      const date = match.kickoff.split ('T')[0];
+      if (!groupedByDate[date]){
+        groupedByDate[date] = [];
+        uniqueDates.push(date);
+      }
+      groupedByDate[date].push(match);
+    } 
+
+    const orderedMatches: MatchWithCity[] =[];
+    let currentCity: City | undefined = originCity;
+
+    // 4. & 5. Iterate through each date and apply the nearest neighbour heuristic
+    for (const date of uniqueDates){
+      const matchesOnDate = groupedByDate[date];
+
+      // If there's only one match on this day then it must be selected
+      if (matchesOnDate.length === 1){
+          const selectedMatch = matchesOnDate[0];
+          orderedMatches.push(selectedMatch);
+          currentCity = selectedMatch.city;
+      } else {
+     
+        // If there are multiple matches on the current day, we'll find the nearest one to our current city
+        if (!currentCity){
+
+            // A potential edge case: if no origin city has been provided and there are multiple matches on the first day, we'll default to the first match on the list.
+            const selectedMatch = matchesOnDate[0];
+            orderedMatches.push(selectedMatch);
+            currentCity = selectedMatch.city;
+        } else {
+            let nearestMatch = matchesOnDate[0];
+            let minDistance = Number.MAX_VALUE;
+
+            for (const match of matchesOnDate){
+              const distance = calculateDistance(
+                currentCity.latitude,
+                currentCity.longitude,
+                match.city.latitude,
+                match.city.longitude
+              );
+
+              if (distance < minDistance){
+                minDistance = distance;
+                nearestMatch = match;
+              }
+            }
+
+            orderedMatches.push(nearestMatch);
+            currentCity = nearestMatch.city;
+        }
+      }
+    }
+
+    // 6. Build the final route object and run the validation rules.
     const route = this.buildRoute(orderedMatches, originCity);
     this.validateRoute(route, orderedMatches);
+
     return route;
   }
 
@@ -89,9 +157,41 @@ export class NearestNeighbourStrategy implements RouteStrategy {
   // ============================================================
 
   private validateRoute(route: OptimisedRoute, matches: MatchWithCity[]): void {
-    // TODO: Your implementation
-  }
+    const warnings: string[] = [];
+    let feasible = true;
 
+    // Checks
+    // 1. We check the minimum matches, must be at least 5.
+    if (matches.length <NearestNeighbourStrategy.MINIMUM_MATCHES){
+      feasible = false;
+      warnings.push(`Must select at least ${NearestNeighbourStrategy.MINIMUM_MATCHES}`);
+    }
+
+    // 2. Country coverage. I decided on a set for tracking unique entries.
+    const countriesVisitedSet = new Set<string>();
+    for (const match of matches){
+      countriesVisitedSet.add(match.city.country);
+    } 
+
+    const countriesVisited = Array.from(countriesVisitedSet);
+
+    // Find any countries that are not currently in the visited set
+    const missingCountries = NearestNeighbourStrategy.REQUIRED_COUNTRIES.filter(
+      (country) => !countriesVisitedSet.has(country)
+      );
+
+      if (missingCountries.length > 0){
+        feasible = false;
+        warnings.push(`Must visit all required countries. Missing ${missingCountries.join(', ')}`)
+      }
+
+      // Update the route object 
+      route.feasible = feasible;
+      route.warnings = warnings;
+      route.countriesVisited = countriesVisited;
+      route.missingCountries = missingCountries;
+    }
+      
   // ============================================================
   //  Helper Methods (provided - no changes needed)
   // ============================================================

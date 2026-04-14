@@ -64,9 +64,92 @@ export function findBestValue(
   flightPrices: FlightPrice[],
   originCity: City
 ): BestValueResult {
-  // TODO: Implement this function
-  return buildErrorResult('Not implemented yet');
+  
+  // 1. Initial validation: We need to ensure we have enough matches to try
+
+  if (!allMatches || allMatches.length < MINIMUM_MATCHES) {
+    return buildErrorResult(`Not enough matches available. Minimum required is ${MINIMUM_MATCHES}.`);
+  }
+
+  let bestCombination: MatchWithCity[] | null = null;
+  let lowestCostForBestCombination = Number.MAX_VALUE;
+
+  // Variables to track the absolute cheapest 5-match option just incase nothing fits in our budget
+  let absoluteCheapestCombination: MatchWithCity[] | null = null;
+  let absoluteLowestCost = Number.MAX_VALUE;
+
+  // 2. Iterate from MINIMUM_MATCHES upto the total number of matches available
+  for (let targetSize = MINIMUM_MATCHES; targetSize <= allMatches.length; targetSize++) {
+
+    // Generate valid combinations (guarantees at least 1 match per required country)
+    const validCombinations = generateValidCombinations(allMatches, targetSize);
+
+    // If no valid combinations can be made for this size, we can't go any higher. Break out.
+    if (validCombinations.length === 0) break;
+
+    let foundMatchWithinBudget = false;
+
+    // 3. Test every combination generated for this target size
+    for (const combination of validCombinations) {
+      const currentCost = calculateTotalCost(combination, originCity, flightPrices);
+
+      // Track the absolute cheapest 5-match combo (fallback scenario)
+      if (targetSize === MINIMUM_MATCHES && currentCost < absoluteLowestCost) {
+        absoluteLowestCost = currentCost;
+        absoluteCheapestCombination = combination;
+      }
+
+      //  Check if this combination fits the budget
+      if (currentCost <= budget) {
+        foundMatchWithinBudget = true;
+        
+        // If it fits the budget, and it's either the first one we found for this size or 
+        // it's cheaper than a previous one we found for this size, save it as the new best
+        if (currentCost < lowestCostForBestCombination || !bestCombination || bestCombination.length < targetSize) {
+          bestCombination = combination;
+          lowestCostForBestCombination = currentCost;
+        }
+      }
+    }
+
+    // 4. If we couldn't find any conbination that fits the budget for the current taregt size,
+    // there is no point trying larger sizes since more matches will cost more money, exit the loop.
+    if (!foundMatchWithinBudget) {
+      break;
+    }
+  }
+    
+  // 5. Build the final result
+  
+  // Scenario A: We found at least one combination that fits the budget!
+  if (bestCombination) {
+    return buildResult(
+      bestCombination,
+      lowestCostForBestCombination,
+      true, // withinBudget = true
+      budget,
+      originCity,
+      flightPrices
+    );
+  }
+
+  // Scenario B: Nothing fit the budget. We return the absolute cheapest 5-match option as a fallback.
+  if (absoluteCheapestCombination) {
+    return buildResult(
+      absoluteCheapestCombination,
+      absoluteLowestCost,
+      false, // withinBudget = false
+      budget,
+      originCity,
+      flightPrices
+    );
+  }
+
+  // Scenario C: Extreme edge case where the helper couldn't even generate a 5-match combo 
+  // (e.g., if one of the countries had zero matches in the dataset)
+  return buildErrorResult('Could not find a valid combination of matches that includes all required countries.');
 }
+
 
 // ============================================================
 // HELPER METHODS - You can use these in your implementation

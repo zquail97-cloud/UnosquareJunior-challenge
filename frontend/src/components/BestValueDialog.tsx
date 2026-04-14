@@ -101,24 +101,33 @@ function BestValueDialog({ result, budget, onClose, onApply }: BestValueDialogPr
           <div className="best-value-matches">
             <h4>Recommended Matches ({matchCount})</h4>
             <ul className="match-list">
-              {matches.map((match) => {
-                const kickoff = new Date(match.kickoff);
-                const dateStr = kickoff.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-                const timeStr = kickoff.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-                return (
-                  <li key={match.id} className="match-item">
-                    <div className="match-teams">
-                      {match.homeTeam.name} vs {match.awayTeam.name}
-                    </div>
-                    <div className="match-details">
-                      <span>{match.city.name}</span>
-                      <span>{dateStr}, {timeStr}</span>
-                      <span className="ticket-price">${match.ticketPrice}</span>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+  {/* 
+    We iterate over the matches array returned by our Best Value API.
+    We use the match ID as the unique key for React's reconciliation.
+  */}
+  {matches.map((match) => {
+    // Format the date and time to be user-friendly
+    const kickoffDate = new Date(match.kickoff);
+    const formattedDate = kickoffDate.toLocaleDateString();
+    const formattedTime = kickoffDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    return (
+      <li key={match.id} className="match-item">
+        {/* Requirement: Display team names */}
+        <div className="match-teams">
+          {match.homeTeam.name} vs {match.awayTeam.name}
+        </div>
+
+        {/* Requirement: Display City, Date/Time, and Price using specified classes */}
+        <div className="match-details">
+          <span>{match.city.name}</span>
+          <span>{formattedDate} at {formattedTime}</span>
+          <span className="ticket-price">${match.ticketPrice.toFixed(2)}</span>
+        </div>
+      </li>
+    );
+  })}
+</ul>
           </div>
         </div>
 

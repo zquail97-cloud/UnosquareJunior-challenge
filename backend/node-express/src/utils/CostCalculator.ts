@@ -83,13 +83,69 @@ export function calculate(
   flightPrices: FlightPrice[],
   originCity: City
 ): BudgetResult {
-  // TODO: Your implementation here
+
+  // Edge case handling: If no matches are provided, exit early.
+  if (!matches || matches.length === 0) {
+    return {
+      feasible: false,
+      costBreakdown: { flights: 0, accommodation: 0, tickets: 0, total: 0 },
+      countriesVisited: [],
+      missingCountries: [...REQUIRED_COUNTRIES],
+      suggestions: ['No matches selected. Please select at least one match in each required country.'],
+    };
+  }
+
+  // 1. Sort matches chronologically by kickoff date
+  // Again the spread operator can be used to create a shallow copy, ensuring we dont mutate the original array
+  const sortedMatches = [...matches].sort(
+    (a, b) => new Date(a.kickoff).getTime() - new Date(b.kickoff).getTime()
+  );
+
+  // 2. Find countries visited
+  // A set can be used to automatically handle deduplication, i.e. multiple visits to the USA only stores the country once
+  const visitedSet = new Set<string>();
+  for (const match of sortedMatches) {
+    visitedSet.add(match.city.country);
+  }
+  const countriesVisited = Array.from(visitedSet);
+
+  // 3.Find missing countries
+  const missingCountries = REQUIRED_COUNTRIES.filter(country => !visitedSet.has(country));
+
+  // 4. Calculate individual costs using the provided helper methods
+  const ticketsCost = calculateTicketsCost(sortedMatches);
+  const flightsCost = calculateFlightsCost(originCity, sortedMatches, flightPrices);
+  const accommodationCost = calculateAccommodationCost(sortedMatches);
+
+  const totalCost = ticketsCost + flightsCost + accommodationCost;
+
+  // 5. Build CostBreakdown object
+  const costBreakdown: CostBreakdown = {
+    flights: flightsCost,
+    accommodation: accommodationCost,
+    tickets: ticketsCost,
+    total: totalCost,
+  };
+
+  // 6. Determine feasibility: There must be no countries missing && total cost must fit within the budget
+  const feasible = (missingCountries.length === 0) && (totalCost <= budget);
+
+  // 7. Generate helpful suggestions (especially if they are over budget) 
+  const suggestions = generateSuggestions(missingCountries, totalCost, budget, sortedMatches);
+
+  // 8. Build the route object representing the physical travel path
+  const route = buildRoute(sortedMatches, 'budget-optimised');
+
+  // 9 Return the final budgetResult
   return {
-    feasible: false,
-    costBreakdown: { flights: 0, accommodation: 0, tickets: 0, total: 0 },
-    countriesVisited: [],
-    missingCountries: [...REQUIRED_COUNTRIES],
-    suggestions: ['Not implemented yet'],
+    feasible,
+    route,
+    costBreakdown,
+    countriesVisited,
+    missingCountries,
+    // Provide the minimum required budget only if they exceeded it
+    minimumBudgetRequired: totalCost > budget ? totalCost : undefined,
+    suggestions,
   };
 }
 
