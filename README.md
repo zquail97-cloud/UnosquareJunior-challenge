@@ -1,3 +1,33 @@
+This is my submission for the World Cup 2026 Travel Route Planner, Unosquare Graduate/Junior SWE Challenge.
+
+I chose a Node/Express backend approach for this project, building on my familiarity with the stack from my recent dissertation. I appreciate the flexibility and non-blocking nature of Node.js when building web applications and APIs.
+
+I was able to finish and implement solutions to all of the base tasks required throughout the project, as well as the two bonus tasks for both the front and back-end components of the project.
+
+Architecture and Design
+
+I used a greedy algorithm to solve the Nearest-Neighbour travel route problem. I implemented date-grouping logic to ensure that the generated itinerary is physically feasible, preventing travel conflicts from occurring on the same day.
+
+I utilised Promise.all in the budget and best-value endpoints to fetch match data, cities, and flight prices simultaneously, with the aim of reducing API latency.
+
+Testing
+
+I wrote unit tests for the route optimisation using Jest, employing factory functions and mock data to ensure tests are isolated and repeatable without any effects on the source data.
+I implemented unit tests for the RouteMap component, mocking react-leaflet to verify proper marker rendering.
+
+Finally, I used Postman to verify that all REST endpoints returned the correct HTTP status codes and appropriate JSON structures. Screenshots of these successful requests can be found in /postman.
+
+AI Assistance
+
+In line with the challenge’s guidelines, I used Google Gemini as a productivity booster. It assisted me in scaffolding the boilerplate, debugging and algorithm logic, allowing me to focus on the high-level architecture and problem solving.
+
+I would like to thank the Unosquare team for the opportunity to work on this mock project and would be happy to answer any questions about my decision making and rationale under review.
+
+All the best,
+
+Zed
+
+
 # World Cup 2026 Travel Route Planner
 
 Unosquare Graduate / Junior SWE Coding Challenge

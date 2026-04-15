@@ -190,22 +190,37 @@ router.post('/budget', async (req, res) => {
 //
 // ============================================================
 
+/*
+ *This endpoint finds the maximum number of matches possible within a budget,
+ * while ensuring all three host countries are visited
+*/
 router.post('/best-value', async (req, res) => {
   try {
     const { budget, originCityId } = req.body;
 
+    // Input Validation
+    // Ensuress the budget is a valud number and that the starting city is provided as a string
+    // befire we perform any database queries.
     if (typeof budget !== 'number' || typeof originCityId !== 'string') {
       return res.status(400).json({ error: 'Invalid payload.' });
     }
 
+    // Data retrieval
+    // We use promise.all to fetch all required data simultaneously (match, city and flights),
+    // this reduces latency by running multiple asyncronous database queries in parallel.
     const [allMatches, originCity, flightPrices] = await Promise.all([
       MatchModel.getAll(),
       CityModel.getById(originCityId),
       FlightPriceModel.getAll()
     ]);
 
+    // Resource verification
+    // If the provided city ID doesn't exist, we return a 404 status code to the client.
     if (!originCity) return res.status(404).json({ error: 'Origin city not found.' });
 
+    // Execution of the 'best value' combinatorial algorithm
+    // We delegate the logic of finding the best combination to the BestValueFiner utility.
+    // This keeps the route handler clean and maintains a seperation of concerns.
     const bestValueResult = BestValueFinder.findBestValue(
       allMatches, 
       budget, 
@@ -214,8 +229,11 @@ router.post('/best-value', async (req, res) => {
       originCity
     );
 
+    // Success response
     res.status(200).json(bestValueResult);
   } catch (error) {
+
+    // Graceful error handling
     console.error('Error finding best value:', error);
     res.status(500).json({ error: 'Failed to find best value' });
   }
